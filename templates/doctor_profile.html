@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Health - Doctor Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{margin:0;background:#eef3f9;color:#0f172a}
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:20}
+.nav-inner{max-width:920px;margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:700;color:#0f172a;text-decoration:none}
+.brand span{color:#3b82f6}
+.container{max-width:920px;margin:0 auto;padding:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.04)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+input{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;font-size:14px}
+input[readonly]{background:#f8fafc;color:#64748b}
+.btn{background:#4f75ff;color:#fff;border:none;border-radius:10px;padding:12px 14px;font-weight:700;cursor:pointer}
+.msg{border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+.msg.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}
+.msg.err{border:1px solid #fecaca;background:#fef2f2;color:#b91c1c}
+.muted{font-size:12px;color:#64748b}
+@media (max-width: 920px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/dashboard">Apex<span>Health</span></a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a class="muted" href="/dashboard" style="text-decoration:none">Patients</a>
+      <a class="muted" href="/settings" style="text-decoration:none">Settings</a>
+      <a class="muted" href="/logout" style="text-decoration:none">Switch Account</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card" style="margin-bottom: 20px; background: #f8fafc; border: 2px dashed #cbd5e1;">
+    <h2 style="margin:0 0 10px 0">Start Teleconsultation</h2>
+    <p class="muted" style="margin-top: 0;">Enter the patient's 14-digit ABHA ID to initialize the video call and AI Scribe.</p>
+
+    {% if request.args.get('abha_error') == 'invalid_format' %}
+    <div class="msg err">ABHA ID must be exactly 14 digits.</div>
+    {% elif request.args.get('abha_error') == 'not_found' %}
+    <div class="msg err">No patient found for this ABHA ID.</div>
+    {% endif %}
+
+    <form action="/doctor/open-by-abha" method="POST" class="grid" style="align-items:end">
+      <input type="hidden" name="next_url" value="/doctor/profile">
+      <div>
+        <label>14-Digit ABHA Number</label>
+        <input type="text" name="abha_id" inputmode="numeric" maxlength="14" pattern="[0-9]{14}" placeholder="e.g. 12345678901234" required>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" type="submit" name="target" value="doctor" style="flex: 1;">Open Video Call & AI</button>
+        <button class="btn" type="submit" name="target" value="patient" style="background:#0f172a; flex: 1;">View Dashboard</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 14px 0">Doctor Profile</h2>
+
+    {% if profile_success %}
+    <div class="msg ok">{{ profile_success }}</div>
+    {% endif %}
+    {% if profile_error %}
+    <div class="msg err">{{ profile_error }}</div>
+    {% endif %}
+
+    <form method="POST" id="doctorProfileForm" novalidate>
+      <div class="grid">
+        <div>
+          <label>Doctor Name *</label>
+          <input type="text" name="name" value="{{ doctor['name'] }}" required>
+        </div>
+        <div>
+          <label>HPR ID</label>
+          <input type="text" name="hpr_id" value="{{ doctor['hpr_id'] }}" readonly>
+        </div>
+        <div>
+          <label>Hospital Name *</label>
+          <input type="text" name="hospital_name" value="{{ doctor['hospital_name'] or 'Apex City Clinic' }}" required>
+        </div>
+        <div>
+          <label>Specialization</label>
+          <input type="text" name="specialization" value="{{ doctor['specialization'] or '' }}">
+        </div>
+        <div>
+          <label>Contact Number</label>
+          <input id="profileContactInput" type="tel" name="contact" value="{{ doctor['contact'] or '' }}" placeholder="+91">
+          <div id="profileContactError" style="margin-top:4px;color:#b91c1c;font-size:12px;min-height:16px"></div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+        <button class="btn" type="submit">Save Profile</button>
+        <span class="muted">Contact format: 10-digit Indian mobile, optional +91.</span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const profileForm = document.getElementById('doctorProfileForm');
+const profileContactInput = document.getElementById('profileContactInput');
+const profileContactError = document.getElementById('profileContactError');
+
+function validateProfileContact() {
+  if (!profileContactInput) return true;
+  const rawContact = (profileContactInput.value || '').trim();
+  if (!rawContact) {
+    profileContactError.textContent = '';
+    return true;
+  }
+
+  let digits = rawContact.replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) {
+    digits = digits.slice(2);
+  }
+
+  if (!/^[6-9]\d{9}$/.test(digits)) {
+    profileContactError.textContent = 'Enter a valid Indian mobile number (10 digits, optional +91).';
+    return false;
+  }
+
+  profileContactError.textContent = '';
+  return true;
+}
+
+if (profileContactInput) {
+  profileContactInput.addEventListener('input', validateProfileContact);
+  profileContactInput.addEventListener('blur', validateProfileContact);
+}
+
+if (profileForm) {
+  profileForm.addEventListener('submit', (event) => {
+    if (!validateProfileContact()) {
+      event.preventDefault();
+      profileContactInput.focus();
+      return;
+    }
+
+    const submitBtn = profileForm.querySelector('button[type="submit"]');
+    if (submitBtn && submitBtn.disabled) {
+      event.preventDefault();
+      return;
+    }
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+    }
+  });
+}
+</script>
+</body>
+</html>
