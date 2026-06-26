@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Health — {{ t('doctor_terminal') }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{margin:0;background:#eef3f9;color:#0f172a}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:20}
+.nav-inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:700;color:#0f172a;text-decoration:none}
+.brand span{color:#3b82f6}
+.lang{display:flex;gap:8px;align-items:center}
+.lang select{height:34px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px}
+.hero{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 8px 20px rgba(15,23,42,.05)}
+.avatar{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#4f75ff,#335df0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:4px 10px;border-radius:999px;font-size:12px}
+.grid{display:grid;grid-template-columns:1.2fr 2fr 1fr;gap:16px;margin-top:16px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;box-shadow:0 8px 20px rgba(15,23,42,.04)}
+label{font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+input,textarea,select{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;font-size:14px}
+textarea{min-height:170px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{background:#4f75ff;color:#fff;border:none;border-radius:10px;padding:12px 14px;font-weight:700;cursor:pointer;width:100%}
+.subtle{font-size:12px;color:#64748b}
+.small-card{background:#f8fbff;border:1px solid #dbeafe;border-radius:12px;padding:10px;margin-bottom:8px}
+.templates{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.tpl{border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:10px;font-size:12px;cursor:pointer;text-align:left}
+.chat-shell{height:500px;display:flex;flex-direction:column;gap:10px}
+.chat-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px}
+.live-pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#0f172a}
+.live-dot{width:9px;height:9px;border-radius:999px;background:#16a34a;box-shadow:0 0 0 4px rgba(22,163,74,.15)}
+.chat-history{height:250px;overflow-y:auto;background:#f8fafc;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;border:1px solid #e2e8f0}
+.chat-input-row{display:flex;gap:8px;align-items:center}
+.chat-actions{display:flex;gap:8px;align-items:center}
+.chat-actions .btn,.chat-actions .btn-secondary{width:auto;padding:10px 12px}
+.chat-role{width:130px}
+.chat-message{max-width:82%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px}
+.chat-message.patient{align-self:flex-start;background:#e2e8f0;color:#0f172a;border-bottom-left-radius:6px}
+.chat-message.doctor{align-self:flex-end;background:#4f75ff;color:#fff;border-bottom-right-radius:6px}
+.chat-meta{font-size:11px;opacity:.8;margin-bottom:4px}
+.chat-status{margin-top:2px;min-height:16px}
+.btn-secondary{background:#64748b;color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.voice-control{margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px;border:1px solid #dbeafe;background:#f8fbff;border-radius:12px}
+.mic-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid #0f172a;background:#0f172a;color:#fff;border-radius:999px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.mic-icon{width:20px;height:20px;border-radius:999px;background:rgba(255,255,255,.15);display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.mic-btn:hover{background:#111827;border-color:#111827}
+.mic-btn.active{background:#b91c1c !important;border-color:#b91c1c !important;animation:scribe-pulse 1.25s ease-in-out infinite}
+.voice-state{font-size:12px;color:#334155;font-weight:600}
+.voice-lang{width:180px}
+@keyframes scribe-pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.25)}70%{box-shadow:0 0 0 10px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.85);color:#fff;z-index:50;align-items:center;justify-content:center;flex-direction:column}
+.overlay.show{display:flex}
+@media (max-width: 1024px){.grid{grid-template-columns:1fr}}
+@media (max-width: 920px){.row{grid-template-columns:1fr}.templates{grid-template-columns:1fr}.voice-control{flex-direction:column;align-items:stretch}.voice-lang{width:100%}.chat-actions{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="overlay" id="processingOverlay">
+  <h3>{{ t('pipeline_active') }}</h3>
+  <p class="subtle" style="color:#cbd5e1">{{ t('process_ai') }}...</p>
+  </div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/doctor/profile">Apex<span>Health</span></a>
+    <div class="lang">
+      <form action="/set-language" method="POST" class="lang">
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <label style="margin:0;text-transform:none;letter-spacing:0">{{ t('language') }}</label>
+        <select name="lang" onchange="this.form.submit()">
+          {% for code, label in supported_languages.items() %}
+          <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+
+          {% endfor %}
+        </select>
+      </form>
+      {% if logged_doctor %}
+      <a href="/doctor/profile" class="subtle" style="text-decoration:none">Doctor Profile</a>
+      <a href="/settings" class="subtle" style="text-decoration:none">Settings</a>
+      {% endif %}
+      <a href="/patient/{{ patient['id'] }}" class="subtle" style="text-decoration:none">{{ t('exit_dashboard') }}</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% if logged_doctor %}
+  <section class="card" style="margin-bottom:12px;padding:12px 16px">
+    {% if abha_lookup_error %}
+    <div style="margin-bottom:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600">{{ abha_lookup_error }}</div>
+    {% endif %}
+    {% if upload_error_message %}
+    <div style="margin-bottom:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600">{{ upload_error_message }}</div>
+    {% endif %}
+    {% if upload_success %}
+    <div style="margin-bottom:10px;border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600">Lab report uploaded successfully.</div>
+    {% endif %}
+    {% if status_update_message %}
+    <div style="margin-bottom:10px;border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600">{{ status_update_message }}</div>
+    {% endif %}
+    <form action="/doctor/open-by-abha" method="POST" class="row" style="align-items:end">
+      <input type="hidden" name="next_url" value="{{ request.path }}">
+      <div>
+        <label>Open Patient by ABHA Number</label>
+        <input type="text" name="abha_id" inputmode="numeric" maxlength="14" pattern="[0-9]{14}" placeholder="Enter 14-digit ABHA" required>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" type="submit" name="target" value="doctor">Open Doctor View</button>
+        <button class="btn" type="submit" name="target" value="patient" style="background:#0f172a">Open Patient Dashboard</button>
+      </div>
+    </form>
+    <div class="subtle" style="margin-top:6px">Logged in as {{ logged_doctor['name'] }} (HPR: {{ logged_doctor['hpr_id'] }})</div>
+  </section>
+  {% endif %}
+
+  {% if logged_doctor %}
+  <section class="card" style="margin-bottom:12px;padding:16px">
+    <h4 style="margin:0 0 12px 0">Upload Lab Report</h4>
+    <form action="/upload_lab_report/{{ patient['id'] }}" method="POST" enctype="multipart/form-data" class="row" style="align-items:end">
+      <div>
+        <label>Report Title</label>
+        <input type="text" name="report_title" placeholder="e.g. CBC Report">
+      </div>
+      <div>
+        <label>Report Type</label>
+        <input type="text" name="report_type" placeholder="e.g. Blood Test">
+      </div>
+      <div>
+        <label>Attach Visit (optional)</label>
+        <select name="consultation_id">
+          <option value="">No visit link</option>
+          {% for visit in history %}
+          <option value="{{ visit['id'] }}">{{ visit['visit_date'] }} - {{ visit['doctor_name'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Lab File</label>
+        <input type="file" name="report_file" accept=".pdf,.png,.jpg,.jpeg,.webp" required>
+      </div>
+      <div>
+        <button class="btn" type="submit">Upload Report</button>
+      </div>
+    </form>
+  </section>
+  {% endif %}
+
+  {% set patient_status = (patient.get('patient_status') or 'active')|lower %}
+
+  <section class="hero">
+    <div style="display:flex;gap:14px;align-items:center">
+      <div class="avatar">{{ patient['name'][0] }}</div>
+      <div>
+        <h2 style="margin:0">{{ patient['name'] }}</h2>
+        <div class="chips">
+          <span class="chip">{{ patient['age'] }} {{ t('age') }}</span>
+          <span class="chip">{{ patient['gender'] }}</span>
+          <span class="chip">{{ t('blood') }}: {{ patient['blood_group'] }}</span>
+          {% if patient_status == 'deceased' %}
+          <span class="chip" style="background:#fee2e2;border-color:#fecaca;color:#b91c1c">{{ t('status') }}: {{ t('deceased') }}</span>
+          {% else %}
+          <span class="chip" style="background:#dcfce7;border-color:#bbf7d0;color:#166534">{{ t('status') }}: {{ t('active') }}</span>
+          {% endif %}
+          <span class="chip">{{ t('contact_number') }}: {{ patient['contact'] or 'Not provided' }}</span>
+          <span class="chip">Email: {{ patient['email'] or 'Not provided' }}</span>
+          <span class="chip">ABHA: {{ patient['abha_id'] or 'Not available' }}</span>
+          {% if patient['allergies'] and patient['allergies'] != 'None' %}
+          <span class="chip">{{ t('known_allergies') }}: {{ patient['allergies'] }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="subtle">{{ t('lifetime_visits') }}</div>
+      <div style="font-size:30px;font-weight:700;text-align:right">{{ history|length }}</div>
+      {% if logged_doctor %}
+      <form action="/doctor/patient/{{ patient['id'] }}/status" method="POST" style="margin-top:10px;text-align:right;">
+        <input type="hidden" name="patient_status" value="{{ 'active' if patient_status == 'deceased' else 'deceased' }}">
+        {% if patient_status == 'deceased' %}
+        <button class="btn" type="submit" style="width:auto;padding:8px 12px;background:#166534;">
+          {{ t('mark_active') }}
+        </button>
+        {% else %}
+        <button class="btn" type="submit" style="width:auto;padding:8px 12px;background:#b91c1c;">
+          {{ t('mark_deceased') }}
+        </button>
+        {% endif %}
+      </form>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="grid">
+    <aside>
+      <div class="card">
+        <h4 style="margin:0 0 10px 0">Live Consultation</h4>
+        <div class="chat-shell">
+          <div class="chat-header">
+            <div class="live-pill">
+              <span class="live-dot"></span>
+              <span>Live Chat Consultation</span>
+            </div>
+            <span id="chatCountBadge" class="subtle">0 messages</span>
+          </div>
+
+          <div id="chatHistory" class="chat-history"></div>
+
+          <div class="chat-input-row">
+            <input id="chatInput" type="text" placeholder="Type a consultation message...">
+          </div>
+
+          <div class="chat-actions">
+            <div class="chat-role" style="align-self:center;min-width:120px;text-align:center;">Doctor</div>
+            <button type="button" id="sendMsgBtn" class="btn">Send</button>
+            <button type="button" id="endConsultationBtn" class="btn-secondary">Summarize to Notes</button>
+          </div>
+          <div id="chatStatus" class="subtle chat-status">Connecting to patient...</div>
+        </div>
+      </div>
+    </aside>
+
+    <section>
+      <div class="card">
+        <form action="/submit_note" method="POST" id="mainForm">
+          <input type="hidden" name="patient_id" value="{{ patient['id'] }}">
+          <input type="hidden" id="chatTranscriptInput" name="chat_transcript" value="">
+          <input type="hidden" id="chatSummaryInput" name="chat_summary" value="">
+          <div class="row">
+            <div>
+              <label>{{ t('visit_date') }}</label>
+              <input type="text" id="visitDate" value="Captured at save time" readonly>
+            </div>
+            <div>
+              <label>Provider Information</label>
+              <input type="text" name="hospital_name" value="{{ logged_doctor['hospital_name'] if logged_doctor and logged_doctor['hospital_name'] else 'Apex City Clinic' }}">
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div>
+              <label>Doctor Name</label>
+              <input type="text" name="doctor_name" value="{{ logged_doctor['name'] if logged_doctor else 'Dr. Sharma' }}" readonly>
+            </div>
+            <div>
+              <label>Doctor HPR Number</label>
+              <input type="text" name="doctor_hpr_id" value="{{ logged_doctor['hpr_id'] if logged_doctor else '' }}" readonly>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <label>{{ t('clinical_notes') }}</label>
+            <div class="voice-control">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button type="button" id="voiceBtn" class="mic-btn" aria-label="Toggle voice input">
+                  <span class="mic-icon">🎤</span>
+                  <span id="voiceBtnText">{{ t('start_voice') }}</span>
+                </button>
+                <span id="voiceState" class="voice-state">{{ t('voice_ready') }}</span>
+              </div>
+              <select id="voiceLang" class="voice-lang">
+                <option value="en-IN" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+                <option value="hi-IN" {% if current_lang == 'hi' %}selected{% endif %}>हिन्दी</option>
+                <option value="ta-IN" {% if current_lang == 'ta' %}selected{% endif %}>தமிழ்</option>
+                <option value="te-IN" {% if current_lang == 'te' %}selected{% endif %}>తెలుగు</option>
+                <option value="bn-IN" {% if current_lang == 'bn' %}selected{% endif %}>বাংলা</option>
+                <option value="mr-IN" {% if current_lang == 'mr' %}selected{% endif %}>मराठी</option>
+              </select>
+            </div>
+            <textarea id="notesInput" name="doctor_notes" placeholder="{{ t('notes_placeholder') }}"></textarea>
+            <div style="display:flex;justify-content:space-between;margin-top:6px">
+              <span id="wordCount" class="subtle">0 {{ t('words') }}</span>
+            </div>
+          </div>
+
+          <button class="btn" type="submit" style="margin-top:12px">{{ t('process_ai') }}</button>
+        </form>
+      </div>
+
+      <div class="templates">
+        {% for tpl in [('Respiratory', 'Patient reports dry cough and wheezing for 4 days. Peak flow 320. No fever. Started Salbutamol Inhaler.'), ('Diabetic F/U', 'Fasting Sugar 180. HbA1c 8.2. Feet numbness present. Patient compliant with Metformin 500mg.'), ('Cardiac', 'BP 150/95. Occasional chest tightness. ECG normal. Started Amlodipine 5mg once daily.')] %}
+        <button class="tpl" onclick="fillTemplate(`{{ tpl[1] }}`)"><strong>{{ tpl[0] }}</strong><br>{{ tpl[1][:60] }}...</button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h4 style="margin:0 0 10px 0">{{ t('lifetime_summary') }}</h4>
+        <div class="small-card" style="font-style:italic">{{ lifetime['cumulative_summary'] or t('analysis_pending') }}</div>
+        {% if lifetime and lifetime.get('risk_flags') and lifetime.get('risk_flags') != '[]' %}
+          <h4 style="margin:12px 0 8px 0">{{ t('prior_risk_alerts') }}</h4>
+          {% for flag in (lifetime.get('risk_flags')|from_json if lifetime.get('risk_flags') is string else lifetime.get('risk_flags')) %}
+          <div class="small-card" style="border-color:#fecaca;background:#fff1f2;color:#9f1239">{{ flag }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h4 style="margin:0 0 10px 0">{{ t('historical_snapshots') }}</h4>
+        {% for v in history[:3] %}
+        <div class="small-card">
+          <strong>{{ v['visit_date'] }}</strong>
+          <div class="subtle">{{ v['doctor_notes'][:110] }}...</div>
+        </div>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+const d = new Date();
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let hours = d.getHours();
+const minutes = String(d.getMinutes()).padStart(2,'0');
+const ampm = hours >= 12 ? 'PM' : 'AM';
+hours = hours % 12 || 12;
+document.getElementById('visitDate').value = `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]} ${d.getFullYear()}, ${String(hours).padStart(2,'0')}:${minutes} ${ampm}`;
+
+const notesEl = document.getElementById('notesInput');
+const wcEl = document.getElementById('wordCount');
+const mainForm = document.getElementById('mainForm');
+const patientIdInput = mainForm ? mainForm.querySelector('input[name="patient_id"]') : null;
+const patientIdValue = Number(patientIdInput ? patientIdInput.value : {{ patient['id']|tojson }});
+const draftStorageKey = `draft_note_patient_${patientIdValue}`;
+const chatHistoryEl = document.getElementById('chatHistory');
+const chatInputEl = document.getElementById('chatInput');
+const sendMsgBtn = document.getElementById('sendMsgBtn');
+const endConsultationBtn = document.getElementById('endConsultationBtn');
+const chatCountBadgeEl = document.getElementById('chatCountBadge');
+const chatStatusEl = document.getElementById('chatStatus');
+const chatTranscriptInput = document.getElementById('chatTranscriptInput');
+const chatSummaryInput = document.getElementById('chatSummaryInput');
+const currentUserRole = 'doctor';
+const currentUserName = {{ logged_doctor['name']|tojson }};
+const currentUserId = {{ session['doctor_id']|default(0) }};
+let chatMessages = [];
+
+const socket = io();
+socket.on('connect', () => {
+  if (chatStatusEl) {
+    chatStatusEl.textContent = 'Connected to patient.';
+  }
+  socket.emit('join_consultation', {
+    patient_id: patientIdValue,
+    doctor_id: currentUserId,
+    user_role: currentUserRole,
+    user_id: currentUserId,
+    user_name: currentUserName,
+  });
+});
+
+socket.on('message_history', (payload) => {
+  if (payload && Array.isArray(payload.messages)) {
+    chatMessages = payload.messages.slice();
+    renderChatHistory();
+  }
+});
+
+socket.on('new_message', (msg) => {
+  if (msg && msg.role && msg.text) {
+    addMessageToHistory(msg);
+  }
+});
+
+socket.on('user_joined', (payload) => {
+  if (payload && payload.user_role && chatStatusEl) {
+    chatStatusEl.textContent = `${payload.user_role === 'doctor' ? 'Doctor' : 'Patient'} has joined the chat.`;
+  }
+});
+
+socket.on('user_typing', (payload) => {
+  if (chatStatusEl && payload && typeof payload.is_typing === 'boolean') {
+    chatStatusEl.textContent = payload.is_typing ? `${payload.user_name || 'User'} is typing...` : 'Connected to patient.';
+  }
+});
+
+socket.on('error', (payload) => {
+  if (chatStatusEl && payload && payload.message) {
+    chatStatusEl.textContent = payload.message;
+  }
+});
+
+function appendMessageToDom(msg) {
+  if (!chatHistoryEl) return;
+  const bubble = document.createElement('div');
+  bubble.className = `chat-message ${msg.role}`;
+
+  const meta = document.createElement('div');
+  meta.className = 'chat-meta';
+  meta.textContent = `${msg.user_name || (msg.role === 'doctor' ? 'Doctor' : 'Patient')} • ${msg.time}`;
+
+  const body = document.createElement('div');
+  body.textContent = msg.text;
+
+  bubble.appendChild(meta);
+  bubble.appendChild(body);
+  chatHistoryEl.appendChild(bubble);
+  chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+}
+
+function renderChatHistory() {
+  if (!chatHistoryEl) return;
+  chatHistoryEl.innerHTML = '';
+  chatMessages.forEach((msg) => appendMessageToDom(msg));
+  syncChatPayload();
+}
+
+function addMessageToHistory(msg) {
+  chatMessages.push(msg);
+  appendMessageToDom(msg);
+  syncChatPayload();
+}
+
+function buildTranscript() {
+  return chatMessages
+    .map((msg) => `${msg.user_name || (msg.role === 'doctor' ? 'Doctor' : 'Patient')} (${msg.time}): ${msg.text}`)
+    .join('\n');
+}
+
+function sendCurrentMessage() {
+  if (!chatInputEl) return;
+  const text = (chatInputEl.value || '').trim();
+  if (!text) return;
+  socket.emit('send_message', {
+    patient_id: patientIdValue,
+    doctor_id: currentUserId,
+    message: text,
+    user_role: currentUserRole,
+    user_name: currentUserName,
+  });
+  chatInputEl.value = '';
+}
+
+function syncChatPayload() {
+  const transcript = buildTranscript();
+
+  if (chatTranscriptInput) {
+    chatTranscriptInput.value = transcript;
+  }
+  if (chatCountBadgeEl) {
+    const count = chatMessages.length;
+    chatCountBadgeEl.textContent = `${count} message${count === 1 ? '' : 's'}`;
+  }
+}
+
+function addMessage(role, text) {
+  if (!text || !text.trim()) return;
+
+  const message = {
+    role: role,
+    text: text.trim(),
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+  chatMessages.push(message);
+
+  if (chatHistoryEl) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-message ${role}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'chat-meta';
+    meta.textContent = `${role === 'doctor' ? 'Doctor' : 'Patient'} • ${message.time}`;
+
+    const body = document.createElement('div');
+    body.textContent = message.text;
+
+    bubble.appendChild(meta);
+    bubble.appendChild(body);
+    chatHistoryEl.appendChild(bubble);
+    chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+  }
+
+  if (chatInputEl) chatInputEl.value = '';
+  if (chatSummaryInput) chatSummaryInput.value = '';
+  if (chatStatusEl) chatStatusEl.textContent = 'New message added. Click Summarize to Notes.';
+  syncChatPayload();
+}
+
+if (sendMsgBtn) {
+  sendMsgBtn.addEventListener('click', sendCurrentMessage);
+}
+
+if (chatInputEl) {
+  chatInputEl.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      sendCurrentMessage();
+    }
+  });
+}
+
+if (endConsultationBtn) {
+  endConsultationBtn.addEventListener('click', async () => {
+    if (!chatMessages.length) {
+      if (chatStatusEl) chatStatusEl.textContent = 'Add at least one chat message first.';
+      if (chatInputEl) chatInputEl.focus();
+      return;
+    }
+
+    const transcript = buildTranscript();
+    if (!transcript.trim()) {
+      if (chatStatusEl) chatStatusEl.textContent = 'Chat transcript is empty.';
+      return;
+    }
+
+    const originalText = endConsultationBtn.textContent;
+    endConsultationBtn.disabled = true;
+    endConsultationBtn.textContent = 'Summarizing...';
+    if (chatStatusEl) chatStatusEl.textContent = 'Generating AI chat summary...';
+
+    try {
+      const response = await fetch('/api/chat-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_transcript: transcript })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const payload = await response.json();
+      const summary = (payload.summary || '').trim();
+      const patientPoints = Array.isArray(payload.patient_points) ? payload.patient_points.slice(0, 5) : [];
+      const doctorActions = Array.isArray(payload.doctor_actions) ? payload.doctor_actions.slice(0, 5) : [];
+      const redFlags = Array.isArray(payload.red_flags) ? payload.red_flags.slice(0, 5) : [];
+
+      if (chatSummaryInput) {
+        chatSummaryInput.value = summary;
+      }
+
+      const chatLines = [];
+      if (summary) chatLines.push(`Live chat summary: ${summary}`);
+      if (patientPoints.length) chatLines.push(`Patient-reported in chat: ${patientPoints.join('; ')}`);
+      if (doctorActions.length) chatLines.push(`Doctor actions in chat: ${doctorActions.join('; ')}`);
+      if (redFlags.length) chatLines.push(`Chat red flags: ${redFlags.join('; ')}`);
+      if (!chatLines.length) chatLines.push('Live chat transcript captured for AI review.');
+
+      const cleaned = notesEl.value
+        .split('\n')
+        .filter((line) => !/^\s*(Live chat summary:|Patient-reported in chat:|Doctor actions in chat:|Chat red flags:)/.test(line))
+        .join('\n')
+        .trim();
+
+      notesEl.value = cleaned ? `${cleaned}\n\n${chatLines.join('\n')}` : chatLines.join('\n');
+      notesEl.dispatchEvent(new Event('input'));
+      notesEl.focus();
+
+      if (chatStatusEl) chatStatusEl.textContent = 'AI chat summary inserted into clinical notes.';
+    } catch (error) {
+      if (chatStatusEl) chatStatusEl.textContent = 'Could not summarize chat right now. You can still submit transcript.';
+    } finally {
+      endConsultationBtn.disabled = false;
+      endConsultationBtn.textContent = originalText;
+    }
+  });
+}
+
+syncChatPayload();
+
+notesEl.addEventListener('input', () => {
+  const wc = notesEl.value.trim().split(/\s+/).filter(Boolean).length;
+  wcEl.textContent = `${wc} {{ t('words') }}`;
+  localStorage.setItem(draftStorageKey, notesEl.value);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedDraft = localStorage.getItem(draftStorageKey);
+  if (savedDraft !== null) {
+    notesEl.value = savedDraft;
+    notesEl.dispatchEvent(new Event('input'));
+  }
+});
+
+function fillTemplate(text) {
+  notesEl.value = text;
+  notesEl.dispatchEvent(new Event('input'));
+  notesEl.focus();
+}
+
+const voiceBtn = document.getElementById('voiceBtn');
+const voiceBtnText = document.getElementById('voiceBtnText');
+const voiceStateEl = document.getElementById('voiceState');
+const langSelect = document.getElementById('voiceLang');
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function appendToNotes(transcript) {
+  const cleanText = (transcript || '').trim();
+  if (!cleanText) return;
+
+  const spacer = notesEl.value && !notesEl.value.endsWith(' ') ? ' ' : '';
+  notesEl.value += `${spacer}${cleanText}`;
+  notesEl.dispatchEvent(new Event('input'));
+  notesEl.focus();
+}
+
+if (voiceBtn) {
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let keepListening = false;
+
+    const setVoiceUi = (active) => {
+      if (active) {
+        if (voiceBtnText) voiceBtnText.textContent = '{{ t('recording') }}';
+        voiceBtn.classList.add('active');
+        if (voiceStateEl) voiceStateEl.textContent = 'Listening...';
+        notesEl.style.boxShadow = '0 0 0 3px #bfdbfe';
+      } else {
+        if (voiceBtnText) voiceBtnText.textContent = '{{ t('start_voice') }}';
+        voiceBtn.classList.remove('active');
+        if (voiceStateEl) voiceStateEl.textContent = '{{ t('voice_ready') }}';
+        notesEl.style.boxShadow = 'none';
+      }
+    };
+
+    voiceBtn.addEventListener('click', () => {
+      if (keepListening) {
+        keepListening = false;
+        recognition.stop();
+        return;
+      }
+
+      recognition.lang = langSelect ? langSelect.value : 'en-IN';
+      keepListening = true;
+      try {
+        recognition.start();
+      } catch (err) {
+        keepListening = false;
+        setVoiceUi(false);
+      }
+    });
+
+    if (langSelect) {
+      langSelect.addEventListener('change', () => {
+        if (keepListening) {
+          recognition.lang = langSelect.value;
+          recognition.stop();
+        }
+      });
+    }
+
+    recognition.onstart = () => {
+      setVoiceUi(true);
+    };
+
+    recognition.onend = () => {
+      if (keepListening) {
+        try {
+          recognition.start();
+          return;
+        } catch (err) {
+          keepListening = false;
+        }
+      }
+      setVoiceUi(false);
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture') {
+        keepListening = false;
+      }
+      if (voiceStateEl && event.error) {
+        voiceStateEl.textContent = `Voice error: ${event.error}`;
+      }
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript + ' ';
+        }
+      }
+      appendToNotes(transcript);
+    };
+  } else {
+    voiceBtn.disabled = true;
+    if (voiceBtnText) voiceBtnText.textContent = 'Voice not supported';
+    if (voiceStateEl) voiceStateEl.textContent = 'Voice typing not supported on this browser';
+  }
+}
+
+mainForm.addEventListener('submit', (e) => {
+  syncChatPayload();
+
+  if (!notesEl.value.trim() && !chatMessages.length) {
+    e.preventDefault();
+    if (chatStatusEl) chatStatusEl.textContent = 'Add notes or at least one chat message before processing.';
+    notesEl.focus();
+    return;
+  }
+
+  if (!notesEl.value.trim() && chatMessages.length) {
+    const summary = chatSummaryInput ? chatSummaryInput.value.trim() : '';
+    notesEl.value = summary ? `Live chat summary: ${summary}` : 'Live consultation chat transcript captured for AI summarization.';
+    notesEl.dispatchEvent(new Event('input'));
+  }
+
+  const submitBtn = mainForm.querySelector('button[type="submit"]');
+  if (submitBtn.disabled) {
+    e.preventDefault();
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = 'Processing AI Pipeline... Please wait';
+  submitBtn.style.background = '#94a3b8';
+
+  localStorage.removeItem(draftStorageKey);
+  document.getElementById('processingOverlay').classList.add('show');
+});
+
+const uploadLabForm = document.querySelector('form[action^="/upload_lab_report/"]');
+if (uploadLabForm) {
+  uploadLabForm.addEventListener('submit', (event) => {
+    const submitBtn = uploadLabForm.querySelector('button[type="submit"]');
+    if (submitBtn && submitBtn.disabled) {
+      event.preventDefault();
+      return;
+    }
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+    }
+  });
+}
+
+</script>
+</body>
+</html>
