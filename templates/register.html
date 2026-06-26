@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Health — {{ t('patient_registration') }}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #eef3f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      background-color: #ffffff;
+      width: 980px;
+      max-width: 100%;
+      min-height: 620px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .form-section {
+      width: 55%;
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .logo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 600;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      padding: 6px 12px;
+      text-decoration: none;
+    }
+
+    .lang-select {
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 0 10px;
+      color: #374151;
+      font-size: 12px;
+      background: #ffffff;
+    }
+
+    h2 {
+      color: #1e1e2f;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    p.subtitle {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .error-box {
+      margin-bottom: 12px;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .input-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .input-group label {
+      display: block;
+      color: #374151;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s;
+      background: #ffffff;
+      color: #111827;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #4f75ff;
+      box-shadow: 0 0 0 3px rgba(79, 117, 255, 0.1);
+    }
+
+    .btn-primary {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+      background-color: #4f75ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+      background-color: #3b5bdb;
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .auth-switch a {
+      color: #4f75ff;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+
+    .illustration-section {
+      width: 50%;
+      background-color: #acc2fa;
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%, 15% 70%, 5% 35%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .illustration-section img {
+      width: 78%;
+      object-fit: contain;
+      margin-left: 15%;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        width: 100%;
+      }
+
+      .form-section {
+        width: 60%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        min-height: auto;
+      }
+
+      .form-section {
+        width: 100%;
+        padding: 24px 18px;
+      }
+
+      .illustration-section {
+        display: none;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-section">
+      <div class="top-row">
+        <a href="/login?role={{ selected_role|default('patient') }}" class="logo-pill">Apex Health</a>
+        <form action="/set-language" method="POST">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <select class="lang-select" name="lang" onchange="this.form.submit()">
+            {% for code, label in supported_languages.items() %}
+            <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+
+      <h2>{{ t('new_patient_enrollment') }}</h2>
+      <p class="subtitle">{{ t('register_subtitle') }}</p>
+
+      {% if register_error %}
+      <div class="error-box">{{ register_error }}</div>
+      {% endif %}
+
+      {% if lock_role %}
+      <div style="margin-bottom:18px;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:600;">
+        Creating {{ t(selected_role|default('patient')) }} account
+      </div>
+      {% else %}
+      <div class="role-tabs" role="tablist" aria-label="Signup role selection" style="display:flex;background:#f3f4f6;border-radius:8px;margin-bottom:18px;overflow:hidden;">
+        <button id="btnPatient" class="active" type="button" onclick="setSignupRole('patient')" style="flex:1;padding:10px;border:none;background:#4f75ff;color:#fff;font-size:14px;font-weight:500;cursor:pointer;">{{ t('patient') }}</button>
+        <button id="btnDoctor" type="button" onclick="setSignupRole('doctor')" style="flex:1;padding:10px;border:none;background:transparent;color:#6b7280;font-size:14px;font-weight:500;cursor:pointer;">{{ t('doctor') }}</button>
+      </div>
+      {% endif %}
+
+      <form id="registerForm" action="/register{% if lock_role %}?role={{ selected_role|default('patient') }}{% endif %}" method="POST" novalidate>
+        <input type="hidden" name="role" id="signupRole" value="patient">
+        <div class="form-grid">
+          <div class="input-group full">
+            <label>{{ t('full_name') }} *</label>
+            <input type="text" name="name" required placeholder="{{ t('full_name') }}">
+          </div>
+
+          <div class="input-group patient-only">
+            <label>{{ t('age') }} *</label>
+            <input type="number" name="age" required placeholder="{{ t('years') }}" min="0" max="120">
+          </div>
+
+          <div class="input-group patient-only">
+            <label>{{ t('gender') }} *</label>
+            <select name="gender" required>
+              <option value="" disabled selected>{{ t('select') }}</option>
+              <option value="Male">{{ t('male') }}</option>
+              <option value="Female">{{ t('female') }}</option>
+              <option value="Other">{{ t('other') }}</option>
+            </select>
+          </div>
+
+          <div class="input-group patient-only">
+            <label>{{ t('blood') }}</label>
+            <select name="blood_group">
+              <option value="Unknown" selected>{{ t('unknown') }}</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>{{ t('contact_number') }}</label>
+            <input id="contactInput" type="tel" name="contact" placeholder="+91">
+            <div id="contactInlineError" style="margin-top:4px;color:#b91c1c;font-size:12px;min-height:16px"></div>
+          </div>
+
+          <div class="input-group patient-only">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="name@example.com">
+          </div>
+
+          <div class="input-group full patient-only">
+            <label>{{ t('known_allergies') }}</label>
+            <input type="text" name="allergies" value="None" placeholder="{{ t('known_allergies') }}">
+          </div>
+
+          <div class="input-group patient-only">
+            <label>{{ t('abha_label') }} *</label>
+            <input id="abhaInput" type="text" name="abha_id" required inputmode="numeric" maxlength="14" pattern="[0-9]{14}" placeholder="{{ t('abha_placeholder') }}">
+            <div id="abhaInlineError" style="margin-top:4px;color:#b91c1c;font-size:12px;min-height:16px"></div>
+          </div>
+
+          <div class="input-group doctor-only" style="display:none;">
+            <label>{{ t('hpr_label') }} *</label>
+            <input type="text" name="hpr_id" maxlength="30" pattern="[A-Za-z0-9-]{5,30}" placeholder="{{ t('hpr_placeholder') }}">
+          </div>
+
+          <div class="input-group doctor-only" style="display:none;">
+            <label>Hospital Name *</label>
+            <input type="text" name="hospital_name" placeholder="e.g. Apex City Clinic" value="Apex City Clinic">
+          </div>
+
+          <div class="input-group doctor-only" style="display:none;">
+            <label>Specialization</label>
+            <input type="text" name="specialization" placeholder="e.g. General Medicine">
+          </div>
+
+          <div class="input-group">
+            <label>{{ t('password') }} *</label>
+            <input type="password" name="password" required minlength="6" placeholder="{{ t('password_placeholder') }}">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">{{ t('initialize_record') }}</button>
+      </form>
+
+      <p class="auth-switch">{{ t('login_as') }} <a href="/login?role={{ selected_role|default('patient') }}">{{ t('login_with_otp') }}</a></p>
+    </div>
+
+    <div class="illustration-section" aria-hidden="true">
+      <img src="https://cdni.iconscout.com/illustration/premium/thumb/doctor-examining-patient-report-4485935-3725640.png" alt="Healthcare illustration">
+    </div>
+  </div>
+  <script>
+    const signupRole = document.getElementById('signupRole');
+    const initialRole = "{{ selected_role|default('patient') }}";
+    const lockRole = {{ 'true' if lock_role else 'false' }};
+    const btnPatient = document.getElementById('btnPatient');
+    const btnDoctor = document.getElementById('btnDoctor');
+    const patientFields = document.querySelectorAll('.patient-only');
+    const doctorFields = document.querySelectorAll('.doctor-only');
+    const registerForm = document.getElementById('registerForm');
+    const abhaInput = document.getElementById('abhaInput');
+    const abhaInlineError = document.getElementById('abhaInlineError');
+    const contactInput = document.getElementById('contactInput');
+    const contactInlineError = document.getElementById('contactInlineError');
+    const registerSubmitButton = registerForm ? registerForm.querySelector('button[type="submit"]') : null;
+    const registerSubmitText = registerSubmitButton ? registerSubmitButton.textContent : 'Create Account';
+
+    function validateContactField() {
+      if (!contactInput) return true;
+      const rawContact = (contactInput.value || '').trim();
+      if (!rawContact) {
+        contactInlineError.textContent = '';
+        return true;
+      }
+
+      let digits = rawContact.replace(/\D/g, '');
+      if (digits.length === 12 && digits.startsWith('91')) {
+        digits = digits.slice(2);
+      }
+
+      if (!/^[6-9]\d{9}$/.test(digits)) {
+        contactInlineError.textContent = 'Enter a valid Indian mobile number (10 digits, optional +91).';
+        return false;
+      }
+
+      contactInlineError.textContent = '';
+      return true;
+    }
+
+    function validateAbhaField() {
+      if (!abhaInput) return true;
+      const abhaValue = (abhaInput.value || '').trim();
+      const isPatient = signupRole.value === 'patient';
+
+      if (!isPatient) {
+        abhaInlineError.textContent = '';
+        return true;
+      }
+
+      if (!/^\d{14}$/.test(abhaValue)) {
+        abhaInlineError.textContent = 'ABHA ID must be exactly 14 digits.';
+        return false;
+      }
+
+      abhaInlineError.textContent = '';
+      return true;
+    }
+
+    function setSignupRole(role) {
+      const isPatient = role === 'patient';
+      signupRole.value = role;
+
+      if (btnPatient && btnDoctor) {
+        btnPatient.style.background = isPatient ? '#4f75ff' : 'transparent';
+        btnPatient.style.color = isPatient ? '#fff' : '#6b7280';
+        btnDoctor.style.background = isPatient ? 'transparent' : '#4f75ff';
+        btnDoctor.style.color = isPatient ? '#6b7280' : '#fff';
+      }
+
+      patientFields.forEach((el) => {
+        el.style.display = isPatient ? '' : 'none';
+      });
+      doctorFields.forEach((el) => {
+        el.style.display = isPatient ? 'none' : '';
+      });
+
+      const age = document.querySelector('input[name="age"]');
+      const gender = document.querySelector('select[name="gender"]');
+      const abha = document.querySelector('input[name="abha_id"]');
+      const hpr = document.querySelector('input[name="hpr_id"]');
+
+      if (age) age.required = isPatient;
+      if (gender) gender.required = isPatient;
+      if (abha) abha.required = isPatient;
+      if (hpr) hpr.required = !isPatient;
+
+      validateAbhaField();
+      validateContactField();
+    }
+
+    if (abhaInput) {
+      abhaInput.addEventListener('input', () => {
+        const normalized = (abhaInput.value || '').replace(/\D/g, '').slice(0, 14);
+        if (abhaInput.value !== normalized) abhaInput.value = normalized;
+        validateAbhaField();
+      });
+      abhaInput.addEventListener('blur', validateAbhaField);
+    }
+
+    if (contactInput) {
+      contactInput.addEventListener('input', validateContactField);
+      contactInput.addEventListener('blur', validateContactField);
+    }
+
+    if (registerForm) {
+      registerForm.addEventListener('submit', (event) => {
+        const submitBtn = registerSubmitButton;
+        if (submitBtn && submitBtn.disabled) {
+          event.preventDefault();
+          return;
+        }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Processing...';
+        }
+
+        const isAbhaValid = validateAbhaField();
+        const isContactValid = validateContactField();
+        if (!isAbhaValid || !isContactValid) {
+          event.preventDefault();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = registerSubmitText;
+          }
+          if (!isAbhaValid && abhaInput) {
+            abhaInput.focus();
+          } else if (!isContactValid && contactInput) {
+            contactInput.focus();
+          }
+        }
+      });
+    }
+
+    if (lockRole) {
+      setSignupRole(initialRole === 'doctor' ? 'doctor' : 'patient');
+    } else {
+      setSignupRole(initialRole === 'doctor' ? 'doctor' : 'patient');
+    }
+  </script>
+</body>
+</html>
