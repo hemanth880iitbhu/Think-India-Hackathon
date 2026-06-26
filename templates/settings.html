@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Health - Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{margin:0;background:#eef3f9;color:#0f172a}
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:20}
+.nav-inner{max-width:900px;margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:700;color:#0f172a;text-decoration:none}
+.brand span{color:#3b82f6}
+.container{max-width:900px;margin:0 auto;padding:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.04)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+input{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;font-size:14px}
+input[readonly]{background:#f8fafc;color:#64748b}
+.btn{background:#4f75ff;color:#fff;border:none;border-radius:10px;padding:12px 14px;font-weight:700;cursor:pointer}
+.msg{border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+.msg.ok{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}
+.msg.err{border:1px solid #fecaca;background:#fef2f2;color:#b91c1c}
+.muted{font-size:12px;color:#64748b}
+@media (max-width: 900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="{{ back_url }}">Apex<span>Health</span></a>
+    <a class="muted" href="{{ back_url }}" style="text-decoration:none">Back</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h2 style="margin:0 0 14px 0">Account Settings</h2>
+    <p class="muted" style="margin-top:0">You can change password here. {{ identifier_label }} cannot be changed.</p>
+
+    {% if settings_success %}
+    <div class="msg ok">{{ settings_success }}</div>
+    {% endif %}
+    {% if settings_error %}
+    <div class="msg err">{{ settings_error }}</div>
+    {% endif %}
+
+    <div class="grid" style="margin-bottom:12px">
+      <div>
+        <label>Name</label>
+        <input type="text" value="{{ user_name }}" readonly>
+      </div>
+      <div>
+        <label>{{ identifier_label }}</label>
+        <input type="text" value="{{ identifier_value }}" readonly>
+      </div>
+    </div>
+
+    <form method="POST" id="settingsForm" novalidate>
+      <div class="grid">
+        <div>
+          <label>Current Password *</label>
+          <input type="password" name="current_password" required>
+        </div>
+        <div></div>
+        <div>
+          <label>New Password *</label>
+          <input id="newPassword" type="password" name="new_password" minlength="6" required>
+        </div>
+        <div>
+          <label>Confirm Password *</label>
+          <input id="confirmPassword" type="password" name="confirm_password" minlength="6" required>
+          <div id="passwordInlineError" style="margin-top:4px;color:#b91c1c;font-size:12px;min-height:16px"></div>
+        </div>
+      </div>
+      <button class="btn" type="submit" style="margin-top:12px">Update Password</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const settingsForm = document.getElementById('settingsForm');
+const newPassword = document.getElementById('newPassword');
+const confirmPassword = document.getElementById('confirmPassword');
+const passwordInlineError = document.getElementById('passwordInlineError');
+
+function validatePasswordMatch() {
+  const np = (newPassword.value || '').trim();
+  const cp = (confirmPassword.value || '').trim();
+
+  if (!np || !cp) {
+    passwordInlineError.textContent = '';
+    return true;
+  }
+
+  if (np !== cp) {
+    passwordInlineError.textContent = 'New password and confirm password do not match.';
+    return false;
+  }
+
+  passwordInlineError.textContent = '';
+  return true;
+}
+
+newPassword.addEventListener('input', validatePasswordMatch);
+confirmPassword.addEventListener('input', validatePasswordMatch);
+
+settingsForm.addEventListener('submit', (event) => {
+  if (!validatePasswordMatch()) {
+    event.preventDefault();
+    confirmPassword.focus();
+    return;
+  }
+
+  const submitBtn = settingsForm.querySelector('button[type="submit"]');
+  if (submitBtn && submitBtn.disabled) {
+    event.preventDefault();
+    return;
+  }
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Updating...';
+  }
+});
+</script>
+</body>
+</html>
