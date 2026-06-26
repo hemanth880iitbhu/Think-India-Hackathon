@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Health - {{ t('login') }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#eef3f9] flex justify-center items-center min-h-screen p-4">
+  <div class="bg-white w-full max-w-4xl min-h-[550px] rounded-2xl shadow-xl flex overflow-hidden relative">
+    <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-sm font-semibold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Apex Health
+        </div>
+        <form action="/set-language" method="POST" class="flex items-center gap-2">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <label class="text-xs text-slate-500 uppercase tracking-widest">{{ t('language') }}</label>
+          <select name="lang" onchange="this.form.submit()" class="bg-white border border-slate-300 text-slate-700 text-xs rounded-lg px-2 py-1.5">
+            {% for code, label in supported_languages.items() %}
+            <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+
+      <h2 class="text-3xl font-bold text-slate-900 mb-2">{{ t('login_title') }}</h2>
+      <p class="text-slate-600 mb-6">{{ t('login_subtitle') }}</p>
+
+      {% if login_error %}
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">{{ login_error }}</div>
+      {% endif %}
+
+      <div class="flex bg-slate-100 rounded-lg p-1 mb-6">
+        <button id="btnPatient" class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white" type="button" onclick="setRole('patient')">{{ t('patient') }}</button>
+        <button id="btnDoctor" class="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-slate-600 hover:text-slate-900" type="button" onclick="setRole('doctor')">{{ t('doctor') }}</button>
+      </div>
+
+      <form id="authForm" action="/login" method="post" novalidate>
+        <input type="hidden" name="role" id="roleField" value="patient">
+
+        <div class="mb-4">
+          <input type="text" id="userId" name="identity" placeholder="{{ t('abha_placeholder') }}" required class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+          <p class="text-xs text-slate-500 mt-1" id="idHelp">{{ t('abha_help') }}</p>
+          <p class="text-xs text-red-600 mt-1 min-h-[16px]" id="identityError" aria-live="polite"></p>
+        </div>
+
+        <div class="mb-4" id="passwordWrap">
+          <div class="relative">
+            <input type="password" id="userPassword" name="password" placeholder="{{ t('password_placeholder') }}" required class="w-full border border-slate-300 rounded-xl px-4 py-3 pr-16 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 text-xs font-semibold" id="pwdToggle">Show</button>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition" id="submitBtn">{{ t('login_with_otp') }}</button>
+      </form>
+
+      <p class="text-center text-slate-600 mt-6 text-sm">
+        {{ t('no_account') }} <a id="signupLink" href="/signup?role=patient" class="text-blue-600 font-semibold hover:underline">{{ t('signup_cta') }}</a>
+      </p>
+    </div>
+
+    <div class="hidden md:block w-1/2 bg-blue-100 relative overflow-hidden rounded-r-2xl">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-200 to-blue-300 opacity-50"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <img src="{{ url_for('static', filename='images/hero-illustration.png') }}" alt="Medical Illustration" class="w-3/4 object-contain">
+      </div>
+    </div>
+  </div>
+
+  <script id="login-i18n" type="application/json">
+    {{ {
+      'patient': t('patient'),
+      'doctor': t('doctor'),
+      'abhaPlaceholder': t('abha_placeholder'),
+      'abhaHelp': t('abha_help'),
+      'hprPlaceholder': t('hpr_placeholder'),
+      'hprHelp': t('hpr_help'),
+      'passwordPlaceholder': t('password_placeholder'),
+      'loginWithOtp': t('login_with_otp')
+    } | tojson }}
+  </script>
+
+  <script>
+    const labels = JSON.parse(document.getElementById('login-i18n').textContent || '{}');
+    const authForm = document.getElementById('authForm');
+    const roleField = document.getElementById('roleField');
+    const userId = document.getElementById('userId');
+    const idHelp = document.getElementById('idHelp');
+    const identityError = document.getElementById('identityError');
+    const passwordWrap = document.getElementById('passwordWrap');
+    const userPassword = document.getElementById('userPassword');
+    const btnPatient = document.getElementById('btnPatient');
+    const btnDoctor = document.getElementById('btnDoctor');
+    const pwdToggle = document.getElementById('pwdToggle');
+    const signupLink = document.getElementById('signupLink');
+    const initialRole = "{{ selected_role|default('patient') }}";
+
+    function setRole(role) {
+      const isPatient = role === 'patient';
+      roleField.value = role;
+
+      btnPatient.classList.toggle('bg-blue-600', isPatient);
+      btnPatient.classList.toggle('text-white', isPatient);
+      btnPatient.classList.toggle('text-slate-600', !isPatient);
+      btnDoctor.classList.toggle('bg-blue-600', !isPatient);
+      btnDoctor.classList.toggle('text-white', !isPatient);
+      btnDoctor.classList.toggle('text-slate-600', isPatient);
+
+      userId.placeholder = isPatient ? labels.abhaPlaceholder : labels.hprPlaceholder;
+      userId.inputMode = isPatient ? 'numeric' : 'text';
+      userId.maxLength = isPatient ? 14 : 30;
+      userId.pattern = isPatient ? '[0-9]{14}' : '[A-Za-z0-9-]+';
+      idHelp.textContent = isPatient ? labels.abhaHelp : labels.hprHelp;
+      identityError.textContent = '';
+
+      passwordWrap.style.display = 'block';
+      userPassword.required = true;
+
+      if (signupLink) {
+        signupLink.href = `/signup?role=${role}`;
+      }
+    }
+
+    userId.addEventListener('input', () => {
+      if (roleField.value !== 'patient') {
+        identityError.textContent = '';
+        return;
+      }
+      const value = userId.value.trim();
+      if (!value) {
+        identityError.textContent = '';
+      } else if (!/^\d+$/.test(value)) {
+        identityError.textContent = 'ABHA ID should contain numbers only.';
+      } else if (value.length !== 14) {
+        identityError.textContent = 'ABHA ID must be exactly 14 digits.';
+      } else {
+        identityError.textContent = '';
+      }
+    });
+
+    pwdToggle.addEventListener('click', () => {
+      const hidden = userPassword.type === 'password';
+      userPassword.type = hidden ? 'text' : 'password';
+      pwdToggle.textContent = hidden ? 'Hide' : 'Show';
+    });
+
+    if (authForm) {
+      authForm.addEventListener('submit', (event) => {
+        const submitBtn = authForm.querySelector('button[type="submit"]');
+        if (submitBtn && submitBtn.disabled) {
+          event.preventDefault();
+          return;
+        }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Processing...';
+        }
+      });
+    }
+
+    setRole(initialRole === 'doctor' ? 'doctor' : 'patient');
+  </script>
+</body>
+</html>
