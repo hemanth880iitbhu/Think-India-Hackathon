@@ -95,7 +95,7 @@ And we built it. Working. Today."
 
 **Step 2:** Doctor clicks to start consultation. During the call, they just **talk naturally**. The system transcribes in real-time. No typing.
 
-**Step 3:** Visit ends. Doctor hits submit. Behind the scenes, our **AI pipeline wakes up**. In 3-5 seconds, it processes everything.
+**Step 3:** Visit ends. Doctor hits submit. Behind  the scenes, our **AI pipeline wakes up**. In 3-5 seconds, it processes everything.
 
 **Step 4:** Doctor sees the output:
 - Structured SOAP note (ready for hospital records)
